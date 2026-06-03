@@ -313,19 +313,15 @@ function openPopover(index) {
 }
 
 function openPopoverById(id) {
-  // Try to find by printing ID in current results
   const index = currentResults.findIndex(
     (r) => r.printing?.id === id || r.card.id === id
   );
   if (index >= 0) {
     openPopover(index);
   } else {
-    // Try to find the printing globally
     const result = getByPrintingId(id);
     if (result) {
-      // Not in current results — just show it standalone
-      currentResults.push(result);
-      openPopover(currentResults.length - 1);
+      showPopoverForResult(result);
     }
   }
 }
@@ -333,15 +329,79 @@ function openPopoverById(id) {
 function openPopoverByPrintingId(printingId) {
   const result = getByPrintingId(printingId);
   if (result) {
-    // Temporarily add to results for display
     const idx = currentResults.findIndex((r) => r.printing?.id === printingId);
     if (idx >= 0) {
       openPopover(idx);
     } else {
-      currentResults.push(result);
-      openPopover(currentResults.length - 1);
+      showPopoverForResult(result);
     }
   }
+}
+
+function showPopoverForResult(result) {
+  const { card, printing } = result;
+  currentPopoverIndex = -1;
+
+  const popover = document.getElementById("popover");
+  popover.classList.remove("hidden");
+
+  const imageEl = popover.querySelector(".popover-image");
+  if (printing && printing.card_image_url) {
+    imageEl.innerHTML = `<img src="${escapeHtml(printing.card_image_url)}" alt="${escapeHtml(card.name)}">`;
+  } else {
+    imageEl.innerHTML = `<img src="cardback.png" alt="${escapeHtml(card.name)}">`;
+  }
+
+  const detailsEl = popover.querySelector(".popover-details");
+  let html = `<h2>${escapeHtml(card.name)}</h2><dl>`;
+  html += `<dt>Color</dt><dd>${escapeHtml(card.color)}</dd>`;
+  html += `<dt>Dice</dt><dd>${escapeHtml(card.dice)}</dd>`;
+  if (card.secondary_dice) {
+    html += `<dt>Secondary</dt><dd>${escapeHtml(card.secondary_dice)}</dd>`;
+  }
+  if (printing) {
+    html += `<dt>Rarity</dt><dd>${escapeHtml(printing.rarity)}</dd>`;
+    html += `<dt>Set</dt><dd>${escapeHtml(printing.edition_name)} (${escapeHtml(printing.set_code)})</dd>`;
+    if (printing.collector_number != null) {
+      html += `<dt>#</dt><dd>${printing.collector_number}</dd>`;
+    }
+    if (printing._artist_str) {
+      html += `<dt>Artist</dt><dd>${escapeHtml(printing._artist_str)}</dd>`;
+    }
+    if (printing.treatment && printing.treatment !== "Standard") {
+      html += `<dt>Treatment</dt><dd>${escapeHtml(printing.treatment)}</dd>`;
+    }
+  }
+  html += `</dl>`;
+
+  if (card.rules_text) {
+    html += `<div class="rules-text">${card.rules_text}</div>`;
+  }
+
+  const allPrintings = getPrintingsForCard(card.id);
+  if (allPrintings.length > 1) {
+    html += `<div class="other-printings"><strong>Other printings:</strong> `;
+    for (const p of allPrintings) {
+      if (p.id === (printing && printing.id)) continue;
+      html += `<a href="#" data-printing-id="${p.id}">${escapeHtml(p.set_code)} #${p.collector_number || "?"}</a> `;
+    }
+    html += `</div>`;
+  }
+
+  detailsEl.innerHTML = html;
+
+  detailsEl.querySelectorAll("[data-printing-id]").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      openPopoverByPrintingId(a.dataset.printingId);
+    });
+  });
+
+  popover.querySelector(".popover-prev").style.display = "none";
+  popover.querySelector(".popover-next").style.display = "none";
+
+  const cardIdForHash = printing ? printing.id : card.id;
+  updateHash(currentQuery, currentPage, cardIdForHash);
 }
 
 function closePopover() {
