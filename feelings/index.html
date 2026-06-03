@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feelings — Mood Swings Card Search</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="header" class="centered">
+      <h1 class="logo">Feelings</h1>
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="Search cards..." autocomplete="off" autofocus>
+        <button type="submit" id="search-btn">Search</button>
+      </form>
+    </header>
+
+    <main id="main">
+      <section id="welcome">
+        <p class="tagline">A search engine for <em>Mood Swings</em> cards</p>
+        <div class="suggestions">
+          <h3>Try a search</h3>
+          <ul>
+            <li><a href="#q=r%3Acommon%20c%3Awhite">r:common c:white</a></li>
+            <li><a href="#q=love%20as%3Aprintings">love as:printings</a></li>
+            <li><a href="#q=r%3Amythic%20set%3AMSW">r:mythic set:MSW</a></li>
+            <li><a href="#q=c%3Ared%20sort%3Adice_value">c:red sort:dice_value</a></li>
+          </ul>
+        </div>
+        <p class="help-link"><a href="help.html">Full query language reference →</a></p>
+      </section>
+
+      <section id="results" class="hidden">
+        <div id="results-info"></div>
+        <div id="error-info" class="hidden"></div>
+        <div id="results-grid"></div>
+        <div id="pagination" class="hidden">
+          <button id="prev-btn" disabled>← Previous</button>
+          <span id="page-info"></span>
+          <button id="next-btn" disabled>Next →</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="popover" class="hidden">
+      <div class="popover-backdrop"></div>
+      <div class="popover-content">
+        <button class="popover-close" aria-label="Close">×</button>
+        <button class="popover-nav popover-prev" aria-label="Previous card">‹</button>
+        <button class="popover-nav popover-next" aria-label="Next card">›</button>
+        <div class="popover-body">
+          <div class="popover-image"></div>
+          <div class="popover-details"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
