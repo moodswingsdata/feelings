@@ -419,6 +419,22 @@ a:hover {
 
 /* Responsive */
 @media (max-width: 600px) {
+  .logo img {
+    max-width: 60vw;
+    height: auto;
+  }
+  #header.top .logo img {
+    margin-bottom: -20px;
+  }
+  #search-form {
+    flex-wrap: wrap;
+  }
+  #search-form #search-input {
+    width: 100%;
+  }
+  #search-form #search-btn {
+    width: 100%;
+  }
   .popover-body {
     flex-direction: column;
   }
