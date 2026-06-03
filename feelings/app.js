@@ -200,17 +200,13 @@ function renderResults() {
     } else {
       const div = document.createElement("div");
       div.className = "result-card";
-
-      if (printing && printing.card_image_url) {
-        div.innerHTML = `
-          <img src="${escapeHtml(printing.card_image_url)}" alt="${escapeHtml(card.name)}" loading="lazy">
-        `;
-      } else {
-        div.innerHTML = `
-          <img src="cardback.png" alt="${escapeHtml(card.name)}" loading="lazy">
-          <div class="card-name">${escapeHtml(card.name)}</div>
-        `;
-      }
+      const imgSrc = (printing && printing.card_image_url)
+        ? escapeHtml(printing.card_image_url)
+        : "cardback.png";
+      div.innerHTML = `
+        <img src="${imgSrc}" alt="${escapeHtml(card.name)}" loading="lazy">
+        <div class="card-name">${escapeHtml(card.name)}</div>
+      `;
       div.addEventListener("click", () => openPopover(globalIndex));
       gridEl.appendChild(div);
     }
