@@ -85,6 +85,15 @@ a:hover {
   margin-bottom: 0;
 }
 
+.logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo a:hover {
+  text-decoration: none;
+}
+
 #header.top .logo img {
   margin-bottom: -32px;
   width: 150px;
