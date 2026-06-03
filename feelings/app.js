@@ -207,6 +207,7 @@ function renderResults() {
         `;
       } else {
         div.innerHTML = `
+          <img src="cardback.png" alt="${escapeHtml(card.name)}" loading="lazy">
           <div class="card-name">${escapeHtml(card.name)}</div>
         `;
       }
@@ -250,7 +251,7 @@ function openPopover(index) {
   if (printing && printing.card_image_url) {
     imageEl.innerHTML = `<img src="${escapeHtml(printing.card_image_url)}" alt="${escapeHtml(card.name)}">`;
   } else {
-    imageEl.innerHTML = `<div class="card-name" style="font-size:1.5rem;padding:2rem;">${escapeHtml(card.name)}</div>`;
+    imageEl.innerHTML = `<img src="cardback.png" alt="${escapeHtml(card.name)}">`;
   }
 
   // Details
