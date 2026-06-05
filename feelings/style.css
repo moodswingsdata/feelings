@@ -375,7 +375,7 @@ a:hover {
 }
 
 .popover-nav {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
   background: var(--bg-hover);
@@ -389,6 +389,7 @@ a:hover {
   color: var(--text);
   font-size: 1.5rem;
   cursor: pointer;
+  z-index: 1001;
 }
 
 .popover-nav:hover {
@@ -396,11 +397,11 @@ a:hover {
 }
 
 .popover-prev {
-  left: -3.5rem;
+  left: 1rem;
 }
 
 .popover-next {
-  right: -3.5rem;
+  right: 1rem;
 }
 
 .popover-body {
