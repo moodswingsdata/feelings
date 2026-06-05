@@ -10,6 +10,7 @@ import {
   executeSearch,
   getPrintingsForCard,
   getByPrintingId,
+  getEditionForPrinting,
 } from "./search.js";
 
 const PAGE_SIZE = 50;
@@ -23,14 +24,16 @@ let currentQuery = "";
 
 async function init() {
   // Load data
-  const [cardsRes, printingsRes] = await Promise.all([
+  const [cardsRes, printingsRes, editionsRes] = await Promise.all([
     fetch("data/cards.json"),
     fetch("data/printings.json"),
+    fetch("data/editions.json"),
   ]);
 
   const cardsData = await cardsRes.json();
   const printingsData = await printingsRes.json();
-  initSearch(cardsData, printingsData);
+  const editionsData = await editionsRes.json();
+  initSearch(cardsData, printingsData, editionsData);
 
   // Set up event listeners
   document.getElementById("search-form").addEventListener("submit", onSubmit);
@@ -202,7 +205,7 @@ function renderResults() {
       div.className = "result-card";
       const imgSrc = (printing && printing.card_image_url)
         ? escapeHtml(printing.card_image_url)
-        : "cardback.png";
+        : "missing.png";
       div.innerHTML = `
         <img src="${imgSrc}" alt="${escapeHtml(card.name)}" loading="lazy">
         <div class="card-name">${escapeHtml(card.name)}</div>
@@ -247,7 +250,7 @@ function openPopover(index) {
   if (printing && printing.card_image_url) {
     imageEl.innerHTML = `<img src="${escapeHtml(printing.card_image_url)}" alt="${escapeHtml(card.name)}">`;
   } else {
-    imageEl.innerHTML = `<img src="cardback.png" alt="${escapeHtml(card.name)}">`;
+    imageEl.innerHTML = `<img src="missing.png" alt="${escapeHtml(card.name)}">`;
   }
 
   // Details
@@ -260,7 +263,10 @@ function openPopover(index) {
   }
   if (printing) {
     html += `<dt>Rarity</dt><dd>${escapeHtml(printing.rarity)}</dd>`;
-    html += `<dt>Set</dt><dd>${escapeHtml(printing.edition_name)} (${escapeHtml(printing.set_code)})</dd>`;
+    const edition = getEditionForPrinting(printing);
+    if (edition) {
+      html += `<dt>Set</dt><dd>${escapeHtml(edition.edition_name)} (${escapeHtml(edition.set_code)})</dd>`;
+    }
     if (printing.collector_number != null) {
       html += `<dt>#</dt><dd>${printing.collector_number}</dd>`;
     }
@@ -283,7 +289,9 @@ function openPopover(index) {
     html += `<div class="other-printings"><strong>Other printings:</strong> `;
     for (const p of allPrintings) {
       if (p.id === (printing && printing.id)) continue;
-      html += `<a href="#" data-printing-id="${p.id}">${escapeHtml(p.set_code)} #${p.collector_number || "?"}</a> `;
+      const pEdition = getEditionForPrinting(p);
+      const setLabel = pEdition ? pEdition.set_code : "?";
+      html += `<a href="#" data-printing-id="${p.id}">${escapeHtml(setLabel)} #${p.collector_number || "?"}</a> `;
     }
     html += `</div>`;
   }
@@ -345,7 +353,7 @@ function showPopoverForResult(result) {
   if (printing && printing.card_image_url) {
     imageEl.innerHTML = `<img src="${escapeHtml(printing.card_image_url)}" alt="${escapeHtml(card.name)}">`;
   } else {
-    imageEl.innerHTML = `<img src="cardback.png" alt="${escapeHtml(card.name)}">`;
+    imageEl.innerHTML = `<img src="missing.png" alt="${escapeHtml(card.name)}">`;
   }
 
   const detailsEl = popover.querySelector(".popover-details");
@@ -357,7 +365,10 @@ function showPopoverForResult(result) {
   }
   if (printing) {
     html += `<dt>Rarity</dt><dd>${escapeHtml(printing.rarity)}</dd>`;
-    html += `<dt>Set</dt><dd>${escapeHtml(printing.edition_name)} (${escapeHtml(printing.set_code)})</dd>`;
+    const edition = getEditionForPrinting(printing);
+    if (edition) {
+      html += `<dt>Set</dt><dd>${escapeHtml(edition.edition_name)} (${escapeHtml(edition.set_code)})</dd>`;
+    }
     if (printing.collector_number != null) {
       html += `<dt>#</dt><dd>${printing.collector_number}</dd>`;
     }
@@ -379,7 +390,9 @@ function showPopoverForResult(result) {
     html += `<div class="other-printings"><strong>Other printings:</strong> `;
     for (const p of allPrintings) {
       if (p.id === (printing && printing.id)) continue;
-      html += `<a href="#" data-printing-id="${p.id}">${escapeHtml(p.set_code)} #${p.collector_number || "?"}</a> `;
+      const pEdition = getEditionForPrinting(p);
+      const setLabel = pEdition ? pEdition.set_code : "?";
+      html += `<a href="#" data-printing-id="${p.id}">${escapeHtml(setLabel)} #${p.collector_number || "?"}</a> `;
     }
     html += `</div>`;
   }
@@ -426,7 +439,8 @@ function onKeydown(e) {
 
 function escapeHtml(str) {
   if (!str) return "";
-  return str
+  if (Array.isArray(str)) str = str.join(", ");
+  return String(str)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
