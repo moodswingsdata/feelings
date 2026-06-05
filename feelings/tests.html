@@ -266,6 +266,18 @@
         "search 'c:white or c:blue': all white or blue");
     }
 
+    // Color: "none" and "colorless" match empty color array
+    {
+      const { ast } = parseQuery("c:none");
+      const { results } = executeSearch(ast);
+      assert(results.every(r => r.card.color.length === 0), "search 'c:none': all colorless");
+    }
+    {
+      const { ast } = parseQuery("c:colorless");
+      const { results } = executeSearch(ast);
+      assert(results.every(r => r.card.color.length === 0), "search 'c:colorless': all colorless");
+    }
+
     // Sort
     {
       const { ast } = parseQuery("c:red sort:dice_value");

@@ -175,6 +175,10 @@ function matchesFilter(card, printing, filter, errors) {
     return matchValue(card.name, operator, value, valueType);
   }
   if (field === "color") {
+    const lowerValue = value.toLowerCase();
+    if (operator === ":" && (lowerValue === "none" || lowerValue === "colorless")) {
+      return card.color.length === 0;
+    }
     return matchValue(card.color, operator, value, valueType, true);
   }
   if (field === "dice") {
