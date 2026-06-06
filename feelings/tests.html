@@ -278,6 +278,38 @@
       assert(results.every(r => r.card.color.length === 0), "search 'c:colorless': all colorless");
     }
 
+    // Color: WUBRG shorthand
+    {
+      const { ast } = parseQuery("c:u");
+      const { results } = executeSearch(ast);
+      assert(results.length > 0, "search 'c:u': has results");
+      assert(results.every(r => r.card.color.includes("Blue")), "search 'c:u': all results are Blue");
+    }
+    {
+      const { ast } = parseQuery("c:w");
+      const { results } = executeSearch(ast);
+      assert(results.length > 0, "search 'c:w': has results");
+      assert(results.every(r => r.card.color.includes("White")), "search 'c:w': all results are White");
+    }
+    {
+      const { ast } = parseQuery("c:b");
+      const { results } = executeSearch(ast);
+      assert(results.length > 0, "search 'c:b': has results");
+      assert(results.every(r => r.card.color.includes("Black")), "search 'c:b': all results are Black");
+    }
+    {
+      const { ast } = parseQuery("c:r");
+      const { results } = executeSearch(ast);
+      assert(results.length > 0, "search 'c:r': has results");
+      assert(results.every(r => r.card.color.includes("Red")), "search 'c:r': all results are Red");
+    }
+    {
+      const { ast } = parseQuery("c:g");
+      const { results } = executeSearch(ast);
+      assert(results.length > 0, "search 'c:g': has results");
+      assert(results.every(r => r.card.color.includes("Green")), "search 'c:g': all results are Green");
+    }
+
     // Sort
     {
       const { ast } = parseQuery("c:red sort:dice_value");
