@@ -4,7 +4,7 @@
  * Evaluates parsed query ASTs against loaded card and printing data.
  */
 
-import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES } from "./parser.js";
+import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES, RARITY_ORDER } from "./parser.js";
 
 let cards = [];
 let printings = [];
@@ -12,7 +12,6 @@ let editions = [];
 let cardIndex = new Map(); // card_id -> card
 let printingsIndex = new Map(); // card_id -> printing[]
 let editionIndex = new Map(); // edition_id -> edition
-const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, "mythic rare": 3 };
 
 /**
  * Initialize the search engine with card, printing, and edition data.

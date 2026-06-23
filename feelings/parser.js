@@ -395,6 +395,7 @@ const COLOR_LABELS = {
 };
 
 const RARITY_NAMES = ["common", "uncommon", "rare", "mythic rare"];
+const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, "mythic rare": 3 };
 
 const RARITY_ALIASES = {
   c: "common",
@@ -536,4 +537,4 @@ export function summarizeQuery(ast) {
   return invalidDescription ? `${validDescription} ${invalidDescription}` : validDescription;
 }
 
-export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES };
+export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES, RARITY_ORDER };
