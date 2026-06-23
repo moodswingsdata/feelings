@@ -394,8 +394,8 @@ const COLOR_LABELS = {
   g: "green",
 };
 
-const RARITY_NAMES = ["common", "uncommon", "rare", "mythic rare"];
 const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, "mythic rare": 3 };
+const RARITY_NAMES = Object.keys(RARITY_ORDER);
 
 const RARITY_ALIASES = {
   c: "common",
@@ -481,7 +481,7 @@ function describeFragment(fragment) {
   return `${label} ${describeOperator(fragment.field, fragment.operator, fragment.value, fragment.valueType, fragment.negated)}`;
 }
 
-function joinWithAnd(values) {
+function formatConjunctiveList(values) {
   if (values.length === 0) return "";
   if (values.length === 1) return values[0];
   if (values.length === 2) return `${values[0]} and ${values[1]}`;
@@ -493,7 +493,7 @@ function formatInvalidKeywords(invalidKeywords) {
   if (keywords.length === 1) {
     return `${keywords[0]} is not a valid search term`;
   }
-  return `${joinWithAnd(keywords)} are not valid search terms`;
+  return `${formatConjunctiveList(keywords)} are not valid search terms`;
 }
 
 function capitalizeFirst(text) {
@@ -520,7 +520,7 @@ export function summarizeQuery(ast) {
       }
     }
     if (fragmentDescriptions.length > 0) {
-      groupDescriptions.push(joinWithAnd(fragmentDescriptions));
+      groupDescriptions.push(formatConjunctiveList(fragmentDescriptions));
     }
   }
 
@@ -537,4 +537,4 @@ export function summarizeQuery(ast) {
   return invalidDescription ? `${validDescription} ${invalidDescription}` : validDescription;
 }
 
-export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES, RARITY_ORDER };
+export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES, RARITY_ORDER, normalizeRarityLabel };

@@ -4,7 +4,7 @@
  * Evaluates parsed query ASTs against loaded card and printing data.
  */
 
-import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES, RARITY_ORDER } from "./parser.js";
+import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ORDER, normalizeRarityLabel } from "./parser.js";
 
 let cards = [];
 let printings = [];
@@ -374,10 +374,8 @@ function matchRarity(fieldValue, operator, queryValue) {
 }
 
 function getRarityOrder(value) {
-  const lowerValue = value.toLowerCase();
-  const rarityName = RARITY_ALIASES[lowerValue]
-    || RARITY_NAMES.find((candidate) => candidate.startsWith(lowerValue));
-  return rarityName ? RARITY_ORDER[rarityName] : null;
+  const rarityName = normalizeRarityLabel(value);
+  return RARITY_ORDER[rarityName] ?? null;
 }
 
 function substituteCardName(value, cardName) {
