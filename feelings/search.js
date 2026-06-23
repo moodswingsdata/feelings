@@ -358,7 +358,7 @@ function matchRarity(fieldValue, operator, queryValue) {
   if (!fieldValue) return false;
   const fieldOrder = RARITY_ORDER[fieldValue.toLowerCase()] ?? null;
 
-  if (queryOrder == null || fieldOrder == null) return false;
+  if (queryOrder === null || fieldOrder === null) return false;
 
   switch (operator) {
     case ">":
