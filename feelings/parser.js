@@ -394,6 +394,8 @@ const COLOR_LABELS = {
   g: "green",
 };
 
+const RARITY_NAMES = ["common", "uncommon", "rare", "mythic rare"];
+
 const RARITY_ALIASES = {
   c: "common",
   common: "common",
@@ -424,7 +426,7 @@ function normalizeColorLabel(value) {
 function normalizeRarityLabel(value) {
   const lowerValue = value.toLowerCase();
   if (RARITY_ALIASES[lowerValue]) return RARITY_ALIASES[lowerValue];
-  const label = ["common", "uncommon", "rare", "mythic rare"].find((candidate) =>
+  const label = RARITY_NAMES.find((candidate) =>
     candidate.startsWith(lowerValue)
   );
   if (label) return label;
@@ -534,4 +536,4 @@ export function summarizeQuery(ast) {
   return invalidDescription ? `${validDescription} ${invalidDescription}` : validDescription;
 }
 
-export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS };
+export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES };

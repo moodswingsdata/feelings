@@ -4,7 +4,7 @@
  * Evaluates parsed query ASTs against loaded card and printing data.
  */
 
-import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS } from "./parser.js";
+import { PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS, RARITY_ALIASES, RARITY_NAMES } from "./parser.js";
 
 let cards = [];
 let printings = [];
@@ -12,20 +12,7 @@ let editions = [];
 let cardIndex = new Map(); // card_id -> card
 let printingsIndex = new Map(); // card_id -> printing[]
 let editionIndex = new Map(); // edition_id -> edition
-const RARITY_ORDER = { Common: 0, Uncommon: 1, Rare: 2, "Mythic Rare": 3 };
-const RARITY_NAMES = ["common", "uncommon", "rare", "mythic rare"];
-const RARITY_ALIASES = {
-  c: "common",
-  common: "common",
-  u: "uncommon",
-  uncommon: "uncommon",
-  r: "rare",
-  rare: "rare",
-  m: "mythic rare",
-  my: "mythic rare",
-  mythic: "mythic rare",
-  "mythic rare": "mythic rare",
-};
+const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, "mythic rare": 3 };
 
 /**
  * Initialize the search engine with card, printing, and edition data.
@@ -368,7 +355,8 @@ function matchNumeric(fieldValue, operator, queryValue) {
 
 function matchRarity(fieldValue, operator, queryValue) {
   const queryOrder = getRarityOrder(queryValue);
-  const fieldOrder = RARITY_ORDER[fieldValue] ?? null;
+  if (!fieldValue) return false;
+  const fieldOrder = RARITY_ORDER[fieldValue.toLowerCase()] ?? null;
 
   if (queryOrder == null || fieldOrder == null) return false;
 
@@ -390,11 +378,7 @@ function getRarityOrder(value) {
   const lowerValue = value.toLowerCase();
   const rarityName = RARITY_ALIASES[lowerValue]
     || RARITY_NAMES.find((candidate) => candidate.startsWith(lowerValue));
-  if (!rarityName) return null;
-  if (rarityName === "common") return RARITY_ORDER.Common;
-  if (rarityName === "uncommon") return RARITY_ORDER.Uncommon;
-  if (rarityName === "rare") return RARITY_ORDER.Rare;
-  return RARITY_ORDER["Mythic Rare"];
+  return rarityName ? RARITY_ORDER[rarityName] : null;
 }
 
 function substituteCardName(value, cardName) {
@@ -464,7 +448,7 @@ function getSortValue(result, field) {
   // Printing fields
   if (printing) {
     if (field === "rarity") {
-      return RARITY_ORDER[printing.rarity] ?? 0;
+    return printing.rarity ? (RARITY_ORDER[printing.rarity.toLowerCase()] ?? 0) : 0;
     }
     if (field === "collector_number" || field === "cn")
       return printing.collector_number;
