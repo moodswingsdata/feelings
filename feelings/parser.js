@@ -300,12 +300,13 @@ function visitKeyedFragment(node, negated) {
   if (!field) {
     return {
       type: "fragment",
-      field: "name",
-      operator: ":",
-      value: rawKeyword,
-      valueType: "string",
+      field: null,
+      operator,
+      value,
+      valueType,
       negated,
-      error: `Unknown keyword "${rawKeyword}"`,
+      invalid: true,
+      rawKeyword,
     };
   }
 
@@ -362,16 +363,171 @@ export function parseQuery(input) {
 
   const ast = buildAST(cst);
 
-  // Collect any fragment-level errors
+  return { ast, errors };
+}
+
+const FIELD_LABELS = {
+  name: "name",
+  id: "ID",
+  color: "color",
+  dice: "dice",
+  dice_value: "dice value",
+  secondary_dice: "secondary dice",
+  secondary_dice_value: "secondary dice value",
+  rules_text: "rules text",
+  rulings_text: "rulings text",
+  frame: "frame",
+  reminder_icon: "reminder icon",
+  rarity: "rarity",
+  dice_color: "dice color",
+  collector_number: "collector number",
+  set: "set",
+  treatment: "treatment",
+  artist: "artist",
+};
+
+const COLOR_LABELS = {
+  w: "white",
+  u: "blue",
+  b: "black",
+  r: "red",
+  g: "green",
+};
+
+const RARITY_LABELS = [
+  ["common", "common"],
+  ["c", "common"],
+  ["uncommon", "uncommon"],
+  ["u", "uncommon"],
+  ["rare", "rare"],
+  ["r", "rare"],
+  ["mythic rare", "mythic rare"],
+  ["mythic", "mythic rare"],
+  ["my", "mythic rare"],
+  ["m", "mythic rare"],
+];
+
+function normalizeColorLabel(value) {
+  const lowerValue = value.toLowerCase();
+  if (lowerValue === "none" || lowerValue === "colorless") return "colorless";
+  if (lowerValue.length > 0 && lowerValue.split("").every((ch) => COLOR_LABELS[ch])) {
+    return lowerValue.split("").map((ch) => COLOR_LABELS[ch]).join(" and ");
+  }
+  return lowerValue;
+}
+
+function normalizeRarityLabel(value) {
+  const lowerValue = value.toLowerCase();
+  for (const [prefix, label] of RARITY_LABELS) {
+    if (lowerValue === prefix) return label;
+  }
+  for (const [prefix, label] of RARITY_LABELS) {
+    if (label.startsWith(lowerValue) || prefix.startsWith(lowerValue)) return label;
+  }
+  return lowerValue;
+}
+
+function formatValue(field, value, valueType) {
+  if (valueType === "regex") return `/${value}/`;
+  if (field === "color") return normalizeColorLabel(value);
+  if (field === "rarity") return normalizeRarityLabel(value);
+  if (field === "name" || field === "rules_text" || field === "rulings_text") {
+    return `"${value}"`;
+  }
+  return value.toLowerCase();
+}
+
+function describeOperator(field, operator, value, valueType, negated) {
+  const formattedValue = formatValue(field, value, valueType);
+  const textField = field === "name" || field === "rules_text" || field === "rulings_text" || field === "artist";
+
+  if (valueType === "regex") {
+    return negated ? `does not match ${formattedValue}` : `matches ${formattedValue}`;
+  }
+
+  if (operator === ">") {
+    return negated ? `is not greater than ${formattedValue}` : `is greater than ${formattedValue}`;
+  }
+  if (operator === "<") {
+    return negated ? `is not less than ${formattedValue}` : `is less than ${formattedValue}`;
+  }
+  if (operator === ">=") {
+    return negated ? `is not ${formattedValue} or greater` : `is ${formattedValue} or greater`;
+  }
+  if (operator === "<=") {
+    return negated ? `is not ${formattedValue} or less` : `is ${formattedValue} or less`;
+  }
+  if (operator === "=") {
+    return negated ? `is not ${formattedValue}` : `is ${formattedValue}`;
+  }
+  if (textField) {
+    return negated ? `does not contain ${formattedValue}` : `contains ${formattedValue}`;
+  }
+  return negated ? `is not ${formattedValue}` : `is ${formattedValue}`;
+}
+
+function describeFragment(fragment) {
+  if (fragment.invalid || !fragment.field || DIRECTIVE_FIELDS.has(fragment.field)) {
+    return null;
+  }
+  const label = FIELD_LABELS[fragment.field] || fragment.field;
+  return `${label} ${describeOperator(fragment.field, fragment.operator, fragment.value, fragment.valueType, fragment.negated)}`;
+}
+
+function joinWithAnd(values) {
+  if (values.length === 0) return "";
+  if (values.length === 1) return values[0];
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(", ")}, and ${values[values.length - 1]}`;
+}
+
+function formatInvalidKeywords(invalidKeywords) {
+  const keywords = invalidKeywords.map((keyword) => `'${keyword}'`);
+  if (keywords.length === 1) {
+    return `${keywords[0]} is not a valid search term`;
+  }
+  return `${joinWithAnd(keywords)} are not valid search terms`;
+}
+
+function capitalizeFirst(text) {
+  if (!text) return text;
+  return text[0].toUpperCase() + text.slice(1);
+}
+
+export function summarizeQuery(ast) {
+  if (!ast || !ast.groups) return "";
+
+  const invalidKeywords = [];
+  const groupDescriptions = [];
+
   for (const group of ast.groups) {
-    for (const frag of group.fragments) {
-      if (frag.error) {
-        errors.push({ message: frag.error });
+    const fragmentDescriptions = [];
+    for (const fragment of group.fragments) {
+      if (fragment.invalid && fragment.rawKeyword) {
+        invalidKeywords.push(fragment.rawKeyword);
+        continue;
       }
+      const description = describeFragment(fragment);
+      if (description) {
+        fragmentDescriptions.push(description);
+      }
+    }
+    if (fragmentDescriptions.length > 0) {
+      groupDescriptions.push(joinWithAnd(fragmentDescriptions));
     }
   }
 
-  return { ast, errors };
+  const validDescription = capitalizeFirst(groupDescriptions.join(" or "));
+  const invalidDescription = invalidKeywords.length > 0
+    ? `(${formatInvalidKeywords(invalidKeywords)})`
+    : "";
+
+  if (!validDescription) {
+    if (!invalidDescription) return "";
+    return `All terms ignored ${invalidDescription}`;
+  }
+
+  return invalidDescription ? `${validDescription} ${invalidDescription}` : validDescription;
 }
 
 export { KEYWORD_MAP, PRINTING_FIELDS, NUMERIC_FIELDS, DIRECTIVE_FIELDS };
