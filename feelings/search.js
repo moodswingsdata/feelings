@@ -13,6 +13,19 @@ let cardIndex = new Map(); // card_id -> card
 let printingsIndex = new Map(); // card_id -> printing[]
 let editionIndex = new Map(); // edition_id -> edition
 const RARITY_ORDER = { Common: 0, Uncommon: 1, Rare: 2, "Mythic Rare": 3 };
+const RARITY_NAMES = ["common", "uncommon", "rare", "mythic rare"];
+const RARITY_ALIASES = {
+  c: "common",
+  common: "common",
+  u: "uncommon",
+  uncommon: "uncommon",
+  r: "rare",
+  rare: "rare",
+  m: "mythic rare",
+  my: "mythic rare",
+  mythic: "mythic rare",
+  "mythic rare": "mythic rare",
+};
 
 /**
  * Initialize the search engine with card, printing, and edition data.
@@ -375,13 +388,13 @@ function matchRarity(fieldValue, operator, queryValue) {
 
 function getRarityOrder(value) {
   const lowerValue = value.toLowerCase();
-  if (lowerValue === "c" || "common".startsWith(lowerValue)) return RARITY_ORDER.Common;
-  if (lowerValue === "u" || "uncommon".startsWith(lowerValue)) return RARITY_ORDER.Uncommon;
-  if (lowerValue === "r" || "rare".startsWith(lowerValue)) return RARITY_ORDER.Rare;
-  if (lowerValue === "m" || "mythic".startsWith(lowerValue) || "mythic rare".startsWith(lowerValue)) {
-    return RARITY_ORDER["Mythic Rare"];
-  }
-  return null;
+  const rarityName = RARITY_ALIASES[lowerValue]
+    || RARITY_NAMES.find((candidate) => candidate.startsWith(lowerValue));
+  if (!rarityName) return null;
+  if (rarityName === "common") return RARITY_ORDER.Common;
+  if (rarityName === "uncommon") return RARITY_ORDER.Uncommon;
+  if (rarityName === "rare") return RARITY_ORDER.Rare;
+  return RARITY_ORDER["Mythic Rare"];
 }
 
 function substituteCardName(value, cardName) {

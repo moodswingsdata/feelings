@@ -394,36 +394,40 @@ const COLOR_LABELS = {
   g: "green",
 };
 
-const RARITY_LABELS = [
-  ["common", "common"],
-  ["c", "common"],
-  ["uncommon", "uncommon"],
-  ["u", "uncommon"],
-  ["rare", "rare"],
-  ["r", "rare"],
-  ["mythic rare", "mythic rare"],
-  ["mythic", "mythic rare"],
-  ["my", "mythic rare"],
-  ["m", "mythic rare"],
-];
+const RARITY_ALIASES = {
+  c: "common",
+  common: "common",
+  u: "uncommon",
+  uncommon: "uncommon",
+  r: "rare",
+  rare: "rare",
+  m: "mythic rare",
+  my: "mythic rare",
+  mythic: "mythic rare",
+  "mythic rare": "mythic rare",
+};
 
 function normalizeColorLabel(value) {
   const lowerValue = value.toLowerCase();
   if (lowerValue === "none" || lowerValue === "colorless") return "colorless";
-  if (lowerValue.length > 0 && lowerValue.split("").every((ch) => COLOR_LABELS[ch])) {
-    return lowerValue.split("").map((ch) => COLOR_LABELS[ch]).join(" and ");
+  if (lowerValue.length > 0) {
+    const colors = [];
+    for (const ch of lowerValue) {
+      if (!COLOR_LABELS[ch]) return lowerValue;
+      colors.push(COLOR_LABELS[ch]);
+    }
+    return colors.join(" and ");
   }
   return lowerValue;
 }
 
 function normalizeRarityLabel(value) {
   const lowerValue = value.toLowerCase();
-  for (const [prefix, label] of RARITY_LABELS) {
-    if (lowerValue === prefix) return label;
-  }
-  for (const [prefix, label] of RARITY_LABELS) {
-    if (label.startsWith(lowerValue) || prefix.startsWith(lowerValue)) return label;
-  }
+  if (RARITY_ALIASES[lowerValue]) return RARITY_ALIASES[lowerValue];
+  const label = ["common", "uncommon", "rare", "mythic rare"].find((candidate) =>
+    candidate.startsWith(lowerValue)
+  );
+  if (label) return label;
   return lowerValue;
 }
 
