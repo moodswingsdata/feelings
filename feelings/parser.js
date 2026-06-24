@@ -570,7 +570,7 @@ export function summarizeQuery(ast) {
 
   const baseDescription = groupDescriptions.join(" or ");
   const validParts = [];
-  if (baseDescription) validParts.push(baseDescription);
+  if (groupDescriptions.length > 0) validParts.push(baseDescription);
   validParts.push(...directiveDescriptions);
   const validDescription = capitalizeFirst(formatConjunctiveList(validParts));
   const invalidDescription = invalidKeywords.length > 0

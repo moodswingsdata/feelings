@@ -195,6 +195,14 @@
       assertEq(summarizeQuery(ast), "Show results as text printings and sort by dice value descending", "summary: directive-only query");
     }
     {
+      const { ast } = parseQuery("sort:dval");
+      assertEq(summarizeQuery(ast), "Sort by dice value", "summary: sort alias resolves");
+    }
+    {
+      const { ast } = parseQuery("sort:custom_field");
+      assertEq(summarizeQuery(ast), "Sort by custom field", "summary: sort field underscores are humanized");
+    }
+    {
       const { ast } = parseQuery("sort:");
       assertEq(summarizeQuery(ast), "Sort results", "summary: empty sort directive");
     }
