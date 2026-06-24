@@ -130,12 +130,12 @@ function onHashChange() {
 }
 
 function updateHash(query, page, cardId) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  if (page && page > 1) params.set("p", String(page));
-  if (cardId) params.set("card", cardId);
+  const parts = [];
+  if (query) parts.push(`q=${encodeURIComponent(query)}`);
+  if (page && page > 1) parts.push(`p=${encodeURIComponent(String(page))}`);
+  if (cardId) parts.push(`card=${encodeURIComponent(cardId)}`);
 
-  const newHash = params.toString();
+  const newHash = parts.join("&");
   if (window.location.hash.slice(1) !== newHash) {
     window.location.hash = newHash;
   }
