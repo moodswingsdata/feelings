@@ -452,7 +452,7 @@ function formatValue(field, value, valueType) {
 }
 
 function formatFieldLabel(field) {
-  return FIELD_LABELS[field] || field.replaceAll("_", " ");
+  return FIELD_LABELS[field] || field.replace(/_/g, " ");
 }
 
 function formatSortValue(value) {
@@ -568,10 +568,9 @@ export function summarizeQuery(ast) {
   }
 
   const baseDescription = groupDescriptions.join(" or ");
-  const validDescription = capitalizeFirst(formatConjunctiveList([
-    ...(baseDescription ? [baseDescription] : []),
-    ...directiveDescriptions,
-  ]));
+  const validDescription = capitalizeFirst(
+    formatConjunctiveList([baseDescription, ...directiveDescriptions].filter(Boolean))
+  );
   const invalidDescription = invalidKeywords.length > 0
     ? `(${formatInvalidKeywords(invalidKeywords)})`
     : "";
