@@ -207,6 +207,10 @@
       assertEq(summarizeQuery(ast), "Sort results", "summary: empty sort directive");
     }
     {
+      const { ast } = parseQuery("as:");
+      assertEq(summarizeQuery(ast), "Show results as cards", "summary: empty as directive");
+    }
+    {
       const { ast } = parseQuery("foo:bar baz:bat");
       assertEq(summarizeQuery(ast), "All terms ignored ('foo' and 'baz' are not valid search terms)", "summary: all invalid terms");
     }

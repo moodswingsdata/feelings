@@ -466,7 +466,10 @@ function formatSortValue(value) {
 
 function describeDirective(fragment) {
   if (fragment.field === "as") {
-    const value = (fragment.value || DEFAULT_AS_VALUE).toLowerCase();
+    const rawValue = fragment.value;
+    const value = rawValue && rawValue.length > 0
+      ? rawValue.toLowerCase()
+      : DEFAULT_AS_VALUE;
     const label = AS_LABELS[value] || value;
     return `show results as ${label}`;
   }
