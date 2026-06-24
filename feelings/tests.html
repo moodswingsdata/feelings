@@ -187,6 +187,14 @@
       assertEq(summarizeQuery(ast), "Color is white ('foo' is not a valid search term)", "summary: mixed valid and invalid");
     }
     {
+      const { ast } = parseQuery("love as:printings sort:name");
+      assertEq(summarizeQuery(ast), 'Name contains "love", show results as printings, and sort by name', "summary: includes directives");
+    }
+    {
+      const { ast } = parseQuery("as:textprintings sort:-dice_value");
+      assertEq(summarizeQuery(ast), "Show results as text printings and sort by dice value descending", "summary: directive-only query");
+    }
+    {
       const { ast } = parseQuery("foo:bar baz:bat");
       assertEq(summarizeQuery(ast), "All terms ignored ('foo' and 'baz' are not valid search terms)", "summary: all invalid terms");
     }

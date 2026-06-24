@@ -386,6 +386,13 @@ const FIELD_LABELS = {
   artist: "artist",
 };
 
+const AS_LABELS = {
+  cards: "cards",
+  printings: "printings",
+  text: "text",
+  textprintings: "text printings",
+};
+
 const COLOR_LABELS = {
   w: "white",
   u: "blue",
@@ -444,6 +451,31 @@ function formatValue(field, value, valueType) {
   return value.toLowerCase();
 }
 
+function formatFieldLabel(field) {
+  return FIELD_LABELS[field] || field.replaceAll("_", " ");
+}
+
+function formatSortValue(value) {
+  const descending = value.startsWith("-");
+  const rawField = descending ? value.slice(1) : value;
+  const resolvedField = KEYWORD_MAP[rawField.toLowerCase()] || rawField;
+  const label = formatFieldLabel(resolvedField);
+  return descending ? `${label} descending` : label;
+}
+
+function describeDirective(fragment) {
+  if (fragment.field === "as") {
+    const value = (fragment.value || "cards").toLowerCase();
+    const label = AS_LABELS[value] || value;
+    return fragment.negated ? `do not show results as ${label}` : `show results as ${label}`;
+  }
+  if (fragment.field === "sort") {
+    const label = formatSortValue(fragment.value || "name");
+    return fragment.negated ? `do not sort by ${label}` : `sort by ${label}`;
+  }
+  return null;
+}
+
 function describeOperator(field, operator, value, valueType, negated) {
   const formattedValue = formatValue(field, value, valueType);
   const textField = field === "name" || field === "rules_text" || field === "rulings_text" || field === "artist";
@@ -474,10 +506,13 @@ function describeOperator(field, operator, value, valueType, negated) {
 }
 
 function describeFragment(fragment) {
-  if (fragment.invalid || !fragment.field || DIRECTIVE_FIELDS.has(fragment.field)) {
+  if (fragment.invalid || !fragment.field) {
     return null;
   }
-  const label = FIELD_LABELS[fragment.field] || fragment.field;
+  if (DIRECTIVE_FIELDS.has(fragment.field)) {
+    return describeDirective(fragment);
+  }
+  const label = formatFieldLabel(fragment.field);
   return `${label} ${describeOperator(fragment.field, fragment.operator, fragment.value, fragment.valueType, fragment.negated)}`;
 }
 
@@ -506,12 +541,20 @@ export function summarizeQuery(ast) {
 
   const invalidKeywords = [];
   const groupDescriptions = [];
+  const directiveDescriptions = [];
 
   for (const group of ast.groups) {
     const fragmentDescriptions = [];
     for (const fragment of group.fragments) {
       if (fragment.invalid && fragment.rawKeyword) {
         invalidKeywords.push(fragment.rawKeyword);
+        continue;
+      }
+      if (DIRECTIVE_FIELDS.has(fragment.field)) {
+        const description = describeFragment(fragment);
+        if (description) {
+          directiveDescriptions.push(description);
+        }
         continue;
       }
       const description = describeFragment(fragment);
@@ -524,7 +567,11 @@ export function summarizeQuery(ast) {
     }
   }
 
-  const validDescription = capitalizeFirst(groupDescriptions.join(" or "));
+  const baseDescription = groupDescriptions.join(" or ");
+  const validDescription = capitalizeFirst(formatConjunctiveList([
+    ...(baseDescription ? [baseDescription] : []),
+    ...directiveDescriptions,
+  ]));
   const invalidDescription = invalidKeywords.length > 0
     ? `(${formatInvalidKeywords(invalidKeywords)})`
     : "";
