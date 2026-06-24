@@ -1,6 +1,7 @@
 # Feelings query language
 
 A Feelings query is generally a series of "<keyword><punctuation><value>"s separate by whitespace.
+If part of a query uses an unknown keyword, that portion should be ignored while the UI explains which search terms were invalid.
 
 ## Keywords
 
