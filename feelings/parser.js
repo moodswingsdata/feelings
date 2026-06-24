@@ -392,6 +392,7 @@ const AS_LABELS = {
   text: "text",
   textprintings: "text printings",
 };
+const DEFAULT_AS_VALUE = "cards";
 
 const COLOR_LABELS = {
   w: "white",
@@ -465,13 +466,13 @@ function formatSortValue(value) {
 
 function describeDirective(fragment) {
   if (fragment.field === "as") {
-    const value = (fragment.value || "cards").toLowerCase();
+    const value = (fragment.value || DEFAULT_AS_VALUE).toLowerCase();
     const label = AS_LABELS[value] || value;
     return `show results as ${label}`;
   }
   if (fragment.field === "sort") {
-    const label = formatSortValue(fragment.value || "name");
-    return `sort by ${label}`;
+    if (!fragment.value) return "sort results";
+    return `sort by ${formatSortValue(fragment.value)}`;
   }
   return null;
 }
