@@ -467,11 +467,11 @@ function describeDirective(fragment) {
   if (fragment.field === "as") {
     const value = (fragment.value || "cards").toLowerCase();
     const label = AS_LABELS[value] || value;
-    return fragment.negated ? `do not show results as ${label}` : `show results as ${label}`;
+    return `show results as ${label}`;
   }
   if (fragment.field === "sort") {
     const label = formatSortValue(fragment.value || "name");
-    return fragment.negated ? `do not sort by ${label}` : `sort by ${label}`;
+    return `sort by ${label}`;
   }
   return null;
 }
@@ -568,9 +568,10 @@ export function summarizeQuery(ast) {
   }
 
   const baseDescription = groupDescriptions.join(" or ");
-  const validDescription = capitalizeFirst(
-    formatConjunctiveList([baseDescription, ...directiveDescriptions].filter(Boolean))
-  );
+  const validParts = [];
+  if (baseDescription) validParts.push(baseDescription);
+  validParts.push(...directiveDescriptions);
+  const validDescription = capitalizeFirst(formatConjunctiveList(validParts));
   const invalidDescription = invalidKeywords.length > 0
     ? `(${formatInvalidKeywords(invalidKeywords)})`
     : "";
