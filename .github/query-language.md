@@ -15,8 +15,10 @@ There is a keyword for each card field:
 - dice_value (alias: dval)
 - secondary_dice (aliases: dd, 2dice)
 - secondary_dice_value (aliases: 2val, 2dval, ddval)
-- rules text (alias: t)
-- rulings (alias: rul)
+- rules text (alias: t) — the canonical oracle text
+- notes (aliases: note, rulings, rul) — clarifying notes / rulings text
+- timing (alias: tm) — when the card applies: `in_play`, `after_playing`, or `to_play`
+- errata (alias: err) — whether the card or its printing has errata (also matches the errata note text)
 
 There is a keyword for most printing fields:
 - frame (alias: fr)
@@ -27,6 +29,10 @@ There is a keyword for most printing fields:
 - set (alias: set; this keyword also searches edition names if no results come up for set codes)
 - treatment (alias: tr)
 - artist (alias: a)
+- headliner (alias: hl) — the editorial "is this the headliner printing" flag
+- printedrules (aliases: printed, pt) — the as-printed rules text, when it differs from the oracle rules text
+
+Boolean keywords (`headliner` and `errata`) accept `yes`/`true`/`1` and `no`/`false`/`0`. An empty value (e.g. `headliner:`) means "true". For `errata`, a non-boolean value searches the errata note text instead.
 
 There are keywords for formatting the results:
 - sort (values are the field to sort by, can reverse the sort order by prepending with a "-")
@@ -50,7 +56,7 @@ Values may also be specified as regular expressions if they're surrounded by "/"
 
 Specific exceptions:
 - Where dice notation is expected, the brackets are optional. "[5]" and "5" are equivalent. For double dice, ommitting the brackets requires quoting and using a space: "[6][1]" is equivalent to "6 1". Order still matters.
-- For rules and reminder text, the value "~" in a query stands for "this card's name". So a search like rul:"~ is worth" would return results like Altruism, whose ruling text reads (in part) "Altruism is worth".
+- For rules and reminder text, the value "~" in a query stands for "this card's name". So a search like note:"~ is worth" would return results like Altruism, whose notes read (in part) "Altruism is worth".
 
 ## Results
 

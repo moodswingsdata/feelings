@@ -30,11 +30,31 @@ export interface Card {
   /** Integer sum of pips in the secondary dice, or null. */
   secondary_dice_value: number | null;
 
-  /** HTML-formatted rules text, or null for vanilla cards. */
+  /** HTML-formatted rules text (canonical oracle value), or null for vanilla cards. */
   rules_text: string | null;
 
-  /** List of ruling strings, or null if no rulings exist. */
-  rulings_text: string[] | null;
+  /**
+   * Canonical timing tokens describing when a card's rules apply,
+   * extracted from the bolded timing phrases.
+   */
+  timing: ("in_play" | "after_playing" | "to_play")[];
+
+  /** List of clarifying note strings, or null if no notes exist. */
+  notes: string[] | null;
+
+  /** Errata flagging corrected fields, or null if none. */
+  errata: Errata | null;
+}
+
+/**
+ * A correction applied to a Card or Printing, flagging which fields changed.
+ */
+export interface Errata {
+  /** Names of the fields that were corrected. */
+  fields: string[];
+
+  /** Human-readable explanation of the correction. */
+  note: string;
 }
 
 /**
@@ -93,4 +113,19 @@ export interface Printing {
 
   /** URL to the card image, or null if unavailable. */
   card_image_url: string | null;
+
+  /**
+   * Editorial flag marking an edition's headliner printing
+   * (Edition 1: Love #134). Defaults to false.
+   */
+  is_headliner: boolean;
+
+  /**
+   * The as-printed rules text when it differs from the card's oracle
+   * `rules_text`, or null when identical.
+   */
+  printed_rules_text: string | null;
+
+  /** Errata flagging corrected fields, or null if none. */
+  errata: Errata | null;
 }
